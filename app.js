@@ -274,7 +274,7 @@ async function handleOAuthCallback() {
 
         console.log('OAuth success');
         // Clean URL
-        window.history.replaceState({}, document.title, '/');
+        window.history.replaceState({}, document.title, window.location.pathname);
 
         return true;
     } catch (err) {
