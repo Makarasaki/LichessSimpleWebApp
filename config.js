@@ -21,7 +21,7 @@ const CONFIG = {
     // Redirect URI - auto-detects from current URL
     // For local testing: http://localhost:4280/
     // For Azure: https://your-app.azurestaticapps.net/
-    REDIRECT_URI: window.location.origin + '/',
+    REDIRECT_URI: window.location.origin + window.location.pathname,
     
     // Lichess API endpoints
     LICHESS_HOST: 'https://lichess.org',
