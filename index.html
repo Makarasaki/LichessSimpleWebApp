@@ -886,12 +886,12 @@ var CONFIG = {
     // Choose a unique client ID for your app
     // Convention: lowercase, use hyphens, make it descriptive and unique
     // Examples: 'kindle-chess-lev', 'my-chess-app-2024', 'chess-viewer-mobile'
-    LICHESS_CLIENT_ID: 'kindle-lichess-client',
+    LICHESS_CLIENT_ID: 'kindle-lichess-makarasaki',
     
     // Redirect URI - auto-detects from current URL
     // For local testing: http://localhost:4280/
     // For Azure: https://your-app.azurestaticapps.net/
-    REDIRECT_URI: window.location.origin + '/',
+    REDIRECT_URI: 'https://makarasaki.github.io/LichessSimpleWebApp/',
     
     // Lichess API endpoints
     LICHESS_HOST: 'https://lichess.org',
@@ -1144,7 +1144,7 @@ function handleOAuthCallback() {
 
         log('OAuth success');
         // Clean URL
-        window.history.replaceState({}, document.title, '/');
+        window.history.replaceState({}, document.title, '/LichessSimpleWebApp/');
 
         return true;
     }).catch(function(err) {
