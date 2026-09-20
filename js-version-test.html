@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kindle JavaScript Capability Test</title>
+<style>
+body { font-family: serif; padding: 12px; background: #fff; color: #000; }
+h1 { font-size: 24px; }
+h2 { font-size: 18px; margin-top: 20px; }
+.row { border-bottom: 1px solid #999; padding: 6px 0; }
+.ok { font-weight: bold; }
+code { font-family: monospace; font-size: 12px; word-wrap: break-word; }
+</style>
+</head>
+<body>
+<h1>Kindle JavaScript Test</h1>
+<div id="summary">Running tests...</div>
+
+<h2>Browser</h2>
+<div class="row"><b>User Agent:</b><br><code id="ua"></code></div>
+<div class="row"><b>Platform:</b> <span id="platform"></span></div>
+
+<h2>Language / syntax</h2>
+<div id="syntax"></div>
+
+<h2>Built-in APIs</h2>
+<div id="apis"></div>
+
+<script>
+(function () {
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function yesno(v) {
+        return v ? "YES" : "NO";
+    }
+
+    function addRow(containerId, name, value) {
+        var div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = "<b>" + name + ":</b> " + value;
+        byId(containerId).appendChild(div);
+    }
+
+    function syntaxTest(code) {
+        try {
+            eval(code);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    byId("ua").innerHTML = navigator.userAgent || "(unknown)";
+    byId("platform").innerHTML = navigator.platform || "(unknown)";
+
+    var es5Count = 0;
+    var es5Total = 0;
+
+    function apiTest(name, value, es5) {
+        var ok = false;
+        try { ok = !!value; } catch (e) { ok = false; }
+        addRow("apis", name, yesno(ok));
+        if (es5) {
+            es5Total++;
+            if (ok) es5Count++;
+        }
+        return ok;
+    }
+
+    // ES3 baseline
+    addRow("syntax", "ES3 basic JavaScript", yesno(syntaxTest("var x = 1; function f(){return x;}")));
+
+    // ES5-ish syntax/features
+    addRow("syntax", "Strict mode syntax", yesno(syntaxTest("'use strict'; var x = 1;")));
+    apiTest("Array.isArray (ES5)", typeof Array.isArray === "function", true);
+    apiTest("Object.keys (ES5)", typeof Object.keys === "function", true);
+    apiTest("Function.prototype.bind (ES5)", typeof Function.prototype.bind === "function", true);
+    apiTest("JSON (ES5)", typeof JSON !== "undefined" && typeof JSON.parse === "function", true);
+    apiTest("Array.prototype.forEach (ES5)", typeof Array.prototype.forEach === "function", true);
+    apiTest("String.prototype.trim (ES5)", typeof String.prototype.trim === "function", true);
+
+    // ES6+ syntax — tested only through eval so this file still parses on old engines.
+    addRow("syntax", "let (ES6)", yesno(syntaxTest("let x = 1;")));
+    addRow("syntax", "const (ES6)", yesno(syntaxTest("const x = 1;")));
+    addRow("syntax", "Arrow functions (ES6)", yesno(syntaxTest("var f = (x) => x + 1;")));
+    addRow("syntax", "Classes (ES6)", yesno(syntaxTest("class A { constructor(){} }")));
+    addRow("syntax", "Template literals (ES6)", yesno(syntaxTest("var x = `abc`;")));
+    addRow("syntax", "Default parameters (ES6)", yesno(syntaxTest("function f(x = 1){ return x; }")));
+
+    // Web APIs relevant to the Lichess app
+    apiTest("Promise", typeof window.Promise === "function");
+    apiTest("fetch", typeof window.fetch === "function");
+    apiTest("URLSearchParams", typeof window.URLSearchParams === "function");
+    apiTest("TextEncoder", typeof window.TextEncoder === "function");
+    apiTest("TextDecoder", typeof window.TextDecoder === "function");
+    apiTest("crypto", !!window.crypto);
+    apiTest("crypto.getRandomValues", !!(window.crypto && window.crypto.getRandomValues));
+    apiTest("crypto.subtle", !!(window.crypto && window.crypto.subtle));
+    apiTest("ReadableStream", typeof window.ReadableStream === "function");
+    apiTest("NodeList.forEach", !!(window.NodeList && NodeList.prototype && NodeList.prototype.forEach));
+    apiTest("classList", !!document.documentElement.classList);
+    apiTest("dataset", "dataset" in document.documentElement);
+    apiTest("localStorage", typeof window.localStorage !== "undefined");
+
+    var es6Syntax =
+        syntaxTest("let x = 1;") &&
+        syntaxTest("const x = 1;") &&
+        syntaxTest("var f = (x) => x;");
+
+    var guess;
+    if (es6Syntax) {
+        guess = "At least partial ES6 (ES2015) syntax support.";
+    } else if (es5Count >= 5) {
+        guess = "Mostly ES5-era JavaScript, without full ES6 syntax.";
+    } else if (es5Count >= 2) {
+        guess = "Partial ES5 support; very old JavaScript engine.";
+    } else {
+        guess = "Mostly ES3-era / very old JavaScript engine.";
+    }
+
+    byId("summary").innerHTML =
+        "<b>Approximate result:</b> " + guess +
+        "<br><small>Browsers do not expose an exact ECMAScript version, so this is feature detection rather than an exact version number.</small>";
+})();
+</script>
+</body>
+</html>
